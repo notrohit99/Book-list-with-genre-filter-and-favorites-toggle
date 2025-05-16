@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Colorful Book List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            padding: 1.5rem;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .filter-section {
+            width: 250px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, display 0.3s ease-in-out; /* Added display transition */
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+        .filter-section.hidden {
+            opacity: 0;
+            transform: translateY(-50px);
+            display: none; /* Changed to none */
+        }
+        .filter-section h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #ff8800;
+            font-size: 1.5rem;
+        }
+        .genre-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .genre-filters button {
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 25px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+            text-align: left;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #555;
+        }
+        .genre-filters button:hover {
+            background: linear-gradient(to right, #ff8800, #ffb84d);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .genre-filters button.active {
+            background: linear-gradient(to right, #ff8800, #ffb84d);
+            color: white;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        .book-list {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .book-card {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+            border: 2px solid #f5f5f5;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            border-color: #ffe082;
+        }
+        .book-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            color: #1a237e;
+            font-size: 1.4rem;
+        }
+        .book-card p {
+            margin-bottom: 1rem;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        .book-card .favorite-toggle {
+            align-self: flex-start;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 2rem;
+            color: #ddd;
+            transition: color 0.3s, transform 0.2s;
+            padding: 0;
+        }
+        .book-card .favorite-toggle:hover {
+            color: #ff6b6b;
+            transform: scale(1.2);
+        }
+        .book-card .favorite-toggle.favorited {
+            color: #ff6b6b;
+            transform: scale(1.2);
+        }
+        footer {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-top: 1px solid #495057;
+        }
+        .book-card img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #favorites-section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        #favorites-section h2 {
+            color: #ff6b6b;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        #favorites-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+        }
+        .show-favorites {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Colorful Book Collection</h1>
+    </header>
+    <main>
+        <div class="filter-section" id="filter-section">
+            <h2>Filter by Genre</h2>
+            <div class="genre-filters" id="genre-filters">
+                <button data-genre="all" class="active">All Genres</button>
+            </div>
+            <button id="view-favorites" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 25px; background: linear-gradient(to right, #ff8800, #ffb84d); color: white; border: none; cursor: pointer; font-size: 1.1rem; transition: background-color 0.3s, transform 0.2s; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);">View Favorites</button>
+        </div>
+        <div class="book-list" id="book-list">
+        </div>
+        <div id="favorites-section">
+            <h2>My Favorite Books</h2>
+            <div id="favorites-list"></div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 My Colorful Book Collection</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bookListContainer = document.getElementById('book-list');
+            const genreFiltersContainer = document.getElementById('genre-filters');
+            const viewFavoritesButton = document.getElementById('view-favorites');
+            const favoritesSection = document.getElementById('favorites-section');
+            const favoritesListContainer = document.getElementById('favorites-list');
+            const filterSection = document.getElementById('filter-section');
+
+
+            let books = [
+                { title: 'The Lord of the Rings', author: 'J.R.R. Tolkien', genre: 'Fantasy', isFavorite: false, image: 'https://m.media-amazon.com/images/I/71jLBXtWJWL._AC_UF1000,1000_QL80_.jpg' },
+                { title: 'Pride and Prejudice', author: 'Jane Austen', genre: 'Romance', isFavorite: true, image: 'https://m.media-amazon.com/images/I/71Q1tPupKjL._AC_UF1000,1000_QL80_.jpg' },
+                { title: 'The Hitchhiker\'s Guide to the Galaxy', author: 'Douglas Adams', genre: 'Science Fiction', isFavorite: false, image: 'https://m.media-amazon.com/images/I/51+qSD6UwfL._AC_UF894,1000_QL80_.jpg' },
+                { title: 'To Kill a Mockingbird', author: 'Harper Lee', genre: 'Fiction', isFavorite: true, image: 'https://m.media-amazon.com/images/I/71xX4g-kFjL._AC_UF1000,1000_QL80_.jpg' },
+                { title: 'Harry Potter and the Sorcerer\'s Stone', author: 'J.K. Rowling', genre: 'Fantasy', isFavorite: false, image: 'https://m.media-amazon.com/images/I/71jK+o2RppL._AC_UF1000,1000_QL80_.jpg' },
+                { title: 'Emma', author: 'Jane Austen', genre: 'Romance', isFavorite: false, image: 'https://m.media-amazon.com/images/I/71yB-R4UcLL._AC_UF1000,1000_QL80_.jpg' },
+                { title: 'Dune', author: 'Frank Herbert', genre: 'Science Fiction', isFavorite: true, image: 'https://m.media-amazon.com/images/I/81+qU5-Uj9L._AC_UF1000,1000_QL80_.jpg' },
+                { title: '1984', author: 'George Orwell', genre: 'Fiction', isFavorite: false, image: 'https://m.media-amazon.com/images/I/71yNgTMEcpL._AC_UF1000,1000_QL80_.jpg' },
+            ];
+
+            function renderBooks(bookArray, container) {
+                container.innerHTML = '';
+                bookArray.forEach(book => {
+                    const bookCard = document.createElement('div');
+                    bookCard.classList.add('book-card');
+                    bookCard.innerHTML = `
+                        <img src="${book.image}" alt="${book.title}">
+                        <h3>${book.title}</h3>
+                        <p>Author: ${book.author}</p>
+                        <p>Genre: ${book.genre}</p>
+                        <button class="favorite-toggle ${book.isFavorite ? 'favorited' : ''}" data-title="${book.title}">
+                            ${book.isFavorite ? '❤️' : '🤍'}
+                        </button>
+                    `;
+                    container.appendChild(bookCard);
+
+                    const favoriteButton = bookCard.querySelector('.favorite-toggle');
+                    favoriteButton.addEventListener('click', toggleFavorite);
+                });
+            }
+
+            function generateGenreFilters() {
+                const genres = ['all', ...new Set(books.map(book => book.genre))];
+                genres.forEach(genre => {
+                    const button = document.createElement('button');
+                    button.textContent = genre === 'all' ? 'All Genres' : genre;
+                    button.dataset.genre = genre;
+                    button.addEventListener('click', filterBooksByGenre);
+                    genreFiltersContainer.appendChild(button);
+                });
+                genreFiltersContainer.querySelector('[data-genre="all"]').classList.add('active');
+            }
+
+            function filterBooksByGenre(event) {
+                const selectedGenre = event.target.dataset.genre;
+                document.querySelectorAll('#genre-filters button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                if (selectedGenre === 'all') {
+                    renderBooks(books, bookListContainer);
+                    favoritesSection.classList.remove('show-favorites');
+                } else {
+                    const filteredBooks = books.filter(book => book.genre === selectedGenre);
+                    renderBooks(filteredBooks, bookListContainer);
+                    favoritesSection.classList.remove('show-favorites');
+                }
+            }
+
+            function toggleFavorite(event) {
+                const bookTitle = event.target.dataset.title;
+                const book = books.find(book => book.title === bookTitle);
+                if (book) {
+                    book.isFavorite = !book.isFavorite;
+                    event.target.textContent = book.isFavorite ? '❤️' : '🤍';
+                    event.target.classList.toggle('favorited');
+                    renderFavorites();
+                }
+            }
+
+            function renderFavorites() {
+                const favoriteBooks = books.filter(book => book.isFavorite);
+                renderBooks(favoriteBooks, favoritesListContainer);
+                if (favoriteBooks.length > 0) {
+                    favoritesSection.classList.add('show-favorites');
+                } else {
+                    favoritesSection.classList.remove('show-favorites');
+                }
+            }
+
+            viewFavoritesButton.addEventListener('click', () => {
+                renderFavorites();
+                bookListContainer.innerHTML = '';
+                document.querySelectorAll('#genre-filters button').forEach(button => button.classList.remove('active'));
+                favoritesSection.classList.toggle('show-favorites');
+            });
+
+            generateGenreFilters();
+            renderBooks(books, bookListContainer);
+            renderFavorites();
+
+            let previousScrollPosition = 0;
+            window.addEventListener('scroll', () => {
+                const currentScrollPosition = window.scrollY;
+                const favoritesSectionTop = favoritesSection.offsetTop;
+                if (currentScrollPosition > favoritesSectionTop - 100) {
+                    filterSection.classList.add('hidden');
+                } else {
+                    filterSection.classList.remove('hidden');
+                }
+                previousScrollPosition = currentScrollPosition;
+            });
+        });
+    </script>
+</body>
+</html>
